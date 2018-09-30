@@ -1365,6 +1365,7 @@ imapc_connection_throttle(struct imapc_connection *conn,
 			conn->throttle_shrink_msecs *= 2;
 		if (conn->to_throttle_shrink != NULL)
 			timeout_reset(conn->to_throttle_shrink);
+    i_info("Handled Gmail [THROTTLED], throttle_msecs = %u", conn->throttle_msecs);
 	} else {
 		if (conn->throttle_shrink_msecs > 0 &&
 		    conn->to_throttle_shrink == NULL) {
@@ -1375,10 +1376,10 @@ imapc_connection_throttle(struct imapc_connection *conn,
 		conn->last_successful_throttle_msecs = conn->throttle_msecs;
 	}
 
-	if (conn->throttle_msecs > 0) {
+  unsigned int msecs = conn->throttle_msecs > 10 ? conn->throttle_msecs : 10;
+	if (msecs > 0) {
 		conn->throttle_end_timeval = ioloop_timeval;
-		timeval_add_msecs(&conn->throttle_end_timeval,
-				  conn->throttle_msecs);
+		timeval_add_msecs(&conn->throttle_end_timeval, msecs);
 		conn->throttle_pending = TRUE;
 	}
 }
